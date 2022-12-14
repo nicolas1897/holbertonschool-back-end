@@ -1,26 +1,22 @@
 #!/usr/bin/python3
 """
-Queries information from the JSON placeholder API.
-Returns the information about an employee's TODO list progress.
+Uses https://jsonplaceholder.typicode.com along with an employee ID to
+return information about the employee's todo list progress
 """
+
 import requests
-import sys
+from sys import argv
 
-if __name__ == "__main__":
-    url = 'https://jsonplaceholder.typicode.com/'
-    user_url = url + "users/{}".format(sys.argv[1])
-    todo_url = url + "todos"
-    params = {"userId": sys.argv[1]}
-    user = requests.get(url=user_url).json()
-    todos = requests.get(url=todo_url, params=params).json()
-    completed = []
-
-    for todo in todos:
-        if todo.get("completed") is True:
-            completed.append(todo.get("title"))
-
+if __name__ == '__main__':
+    userId = argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".
+                        format(userId), verify=False).json()
+    todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
+                        format(userId), verify=False).json()
+    completed_tasks = []
+    for task in todo:
+        if task.get('completed') is True:
+            completed_tasks.append(task.get('title'))
     print("Employee {} is done with tasks({}/{}):".
-          format(user.get("name"), len(completed), len(todos)))
-
-    for complete in completed:
-        print("\t {}".format(complete))
+          format(user.get('name'), len(completed_tasks), len(todo)))
+    print("\n".join("\t {}".format(task) for task in completed_tasks))
