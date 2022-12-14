@@ -1,27 +1,28 @@
 #!/usr/bin/python3
-"""
-Task 0 - Python script that, using this REST API, for a given employee ID,
-returns information about his/her TODO list progress.
-"""
+"api"
 
-if __name__ == '__main__':
-    import requests
-    from sys import argv
+import requests
+from sys import argv
 
-    rq = requests.get('https://jsonplaceholder.typicode.com/users/{}'.
-                      format(argv[1]))
-    rqname = rq.json().get('name')
 
-    rq = requests.get('https://jsonplaceholder.typicode.com/todos?userId={}'.
-                      format(argv[1]))
-    rqdata = rq.json()
-    done = total = 0
-    for task in rqdata:
-        total += 1
-        if task.get('completed'):
-            done += 1
+if __name__ == "__main__":
+    completed = 0
+    totalTasks = 0
 
-    print('Employee {} is done with tasks({}/{}):'.format(rqname, done, total))
-    for task in rqdata:
-        if task.get('completed'):
-            print('\t {}'.format(task.get('title')))
+    userId = argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                        .format(userId))
+    name = user.json().get('name')
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
+
+    for task in todos.json():
+        if task.get('userId') == int(userId):
+            totalTasks += 1
+            if task.get('completed'):
+                completed += 1
+
+    print('Employee {} is done with tasks({}/{}):'
+          .format(name, completed, totalTasks))
+
+    print('\n'.join(["\t " + task.get('title') for task in todos.json()
+          if task.get('userId') == int(userId) and task.get('completed')]))
